@@ -1,0 +1,2 @@
+identifiy-application-scope-bean
+================================

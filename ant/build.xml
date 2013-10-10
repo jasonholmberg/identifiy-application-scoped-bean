@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="${war.name}" default="build" basedir="../">
+
+	<description>Build jar for NeededRest</description>
+
+	<property file="ant/build.properties"/>
+	<property name="docs.dir" location="docs" />
+	<property name="server.home" location="${user.home}/${server.loc}" />
+	<property name="server.lib.dir" location="${server.home}/lib" />
+	<property name="war.file" value="${war.name}.war"/>
+	<property name="deploy.loc" location="${server.home}/domains/${domain}/autodeploy" />
+
+	<path id="compile.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${server.lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="build" depends="compile,war" />
+	<target name="deploy" depends="compile,war,copy" />
+
+	<target name="clean" description="clean up">
+		<delete dir="${deploy.loc}" includes="${war.name}.*"/>
+	</target>
+
+	<target name="compile" description="compile the source ">
+		<delete dir="${dist.dir}" />
+		<delete dir="${build.dir}" />
+		<delete dir="${docs.dir}" />
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${build.dir}/classes" />
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${build.dir}/classes" excludes="test/"
+			debug="on" debuglevel="lines,vars,source">
+			<classpath refid="compile.classpath" />
+		</javac>
+		<copy todir="${build.dir}/classes">
+			<fileset dir="${config.dir}" includes="*.properties"/>
+		</copy>
+	</target>
+
+	<target name="war">
+		<war destfile="${dist.dir}/${war.file}" webxml="${webapp.dir}/WEB-INF/web.xml">
+			<fileset dir="${webapp.dir}" />
+			<lib dir="${lib.dir}" />
+			<classes dir="${build.dir}/classes"/>
+			<classes dir="${build.dir}/classes" includes="*.properties"/>
+		</war>
+	</target>
+
+	<target name="copy">
+		<copy file="${dist.dir}/${war.file}" todir="${deploy.loc}"/>
+	</target>
+</project>
